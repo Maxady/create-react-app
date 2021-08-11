@@ -5,11 +5,13 @@ import {BrowserRouter, Switch, Route} from 'react-router-dom';
 import AddTask from './AddTask';
 import initialData from '../initialData';
 import uniqueid from 'uniqueid'
+import Fetching from './Fetching';
 
 class App extends React.Component{
 
     state = {
-       tasks : initialData
+       tasks : [],
+       fetching: true
     } 
 
     onToggleCompleted = (taskId) => {
@@ -36,9 +38,33 @@ class App extends React.Component{
         }))
     }
 
+    shouldComponentUpdate = () => {
+        console.log('Bonjour shouldComponentUpdate')
+        return true
+    }
+
+    componentDidMount = () => {
+        console.log('Bonjour componentDidMount')
+        let delay = Math.floor(Math.random() * 5000)
+        setTimeout(()=>{
+            this.setState({
+                tasks : initialData,
+                fetching: false
+            })
+        },delay)
+    }
+
+    onDeleteCompleted = () => {
+        this.setState(prevState =>({
+            tasks: prevState.tasks.filter((task)=> !task.completed)
+        }))
+    }
+
+
     render () {
        return (
         <section id="todo">
+            { this.state.fetching ? <Fetching /> : null }
             <BrowserRouter>
                 <Switch>
                     <Route path="/add-task" 
@@ -47,7 +73,7 @@ class App extends React.Component{
                         path="/:filter?" 
                         render={(props) => <ToDoList {...props} tasks={this.state.tasks} onToggleCompleted={this.onToggleCompleted} />}></Route>
                 </Switch>
-                <NavBar />
+                <NavBar onDeleteCompleted={this.onDeleteCompleted} />
             </BrowserRouter>
         </section>
        )
